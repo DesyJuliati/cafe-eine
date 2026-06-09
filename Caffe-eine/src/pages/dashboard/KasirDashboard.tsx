@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { useAuthStore } from "@/store/authStore";
+import useAuthStore from "@/store/authStore";
 import toast from "react-hot-toast";
 
 // ===== TYPES =====
@@ -28,7 +28,10 @@ interface ShiftStat {
 // ===== ANIMATIONS =====
 const containerVariants = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.1 } },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1, delayChildren: 0.1 },
+  },
 };
 
 const cardVariants = {
@@ -61,7 +64,9 @@ export default function KasirDashboard() {
   };
 
   const shiftDuration = () => {
-    const diff = Math.floor((currentTime.getTime() - shiftStart.getTime()) / 1000);
+    const diff = Math.floor(
+      (currentTime.getTime() - shiftStart.getTime()) / 1000,
+    );
     const h = Math.floor(diff / 3600);
     const m = Math.floor((diff % 3600) / 60);
     const s = diff % 60;
@@ -298,7 +303,9 @@ export default function KasirDashboard() {
                   >
                     <motion.div
                       className="h-full rounded-full"
-                      style={{ backgroundColor: i === 0 ? "#7D301F" : "#DC9E6B" }}
+                      style={{
+                        backgroundColor: i === 0 ? "#7D301F" : "#DC9E6B",
+                      }}
                       initial={{ width: 0 }}
                       animate={{ width: `${item.pct}%` }}
                       transition={{ delay: 0.4 + i * 0.1, duration: 0.6 }}
@@ -353,7 +360,10 @@ export default function KasirDashboard() {
             {/* Info Shift */}
             <div
               className="rounded-2xl p-5"
-              style={{ backgroundColor: "#F5EFE6", border: "1px solid #E8DDD0" }}
+              style={{
+                backgroundColor: "#F5EFE6",
+                border: "1px solid #E8DDD0",
+              }}
             >
               <h3
                 className="font-semibold text-sm mb-3"

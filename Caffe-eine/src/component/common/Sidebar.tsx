@@ -8,7 +8,6 @@ import {
   Package,
   LogOut,
   Coffee,
-  Users,
 } from "lucide-react";
 import useAuthStore from "@/store/authStore";
 
@@ -38,7 +37,7 @@ const navItems = [
     label: "Menu",
     roles: ["admin"],
   },
-  { to: "/employees", icon: Users, label: "Karyawan", roles: ["admin"] }, // ← BARU req #7
+
   { to: "/stock", icon: Package, label: "Stok", roles: ["admin"] },
 ];
 

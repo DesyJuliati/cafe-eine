@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Minus, Plus, ShoppingCart, Trash2, MessageSquare } from "lucide-react";
-import { Emoji } from "react-emoji-render";
+import ReactEmoji from "react-emoji-render";
 import AppLayout from "@/component/common/AppLayout";
 import { useCartStore } from "@/store/cartStore";
 import { useMenuStore } from "@/store/menuStore";
@@ -192,10 +192,24 @@ export default function POSPage() {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      fontSize: 48,
                     }}
                   >
-                    <Emoji text={item.image} />
+                    {item.image?.includes(".png") ||
+                    item.image?.includes(".jpg") ||
+                    item.image?.includes(".jpeg") ||
+                    item.image?.startsWith("data:") ? (
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        style={{
+                          width: "80%",
+                          height: "80%",
+                          objectFit: "contain",
+                        }}
+                      />
+                    ) : (
+                      <span style={{ fontSize: 48 }}>{item.image}</span>
+                    )}
                   </div>
                   <div style={{ padding: "10px 12px" }}>
                     <div

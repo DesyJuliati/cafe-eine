@@ -11,7 +11,6 @@ import KitchenPage from "@/pages/kitchen/KitchenPage";
 import ReportPage from "@/pages/report/ReportPage";
 import MenuManagement from "@/pages/menu/MenuPage";
 import StockPage from "@/pages/stock/StockPage";
-import EmployeePage from "@/pages/employee/EmployeePage"; // ← Impor (sudah ada)
 
 export default function AppRoutes() {
   const { isAuthenticated, user } = useAuthStore();
@@ -63,14 +62,6 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["admin"]}>
             <StockPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/employees"
-        element={
-          <ProtectedRoute allowedRoles={["admin"]}>
-            <EmployeePage />
           </ProtectedRoute>
         }
       />

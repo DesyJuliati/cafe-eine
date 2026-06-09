@@ -20,11 +20,6 @@ interface AuthStore {
   logout: () => void;
 }
 
-const dummyUsers: AuthUser[] = [
-  { id: 1, name: "Admin Utama", email: "admin@caffeeine.id", role: "admin" },
-  { id: 2, name: "Budi Kasir", email: "kasir@caffeeine.id", role: "cashier" },
-];
-
 const useAuthStore = create<AuthStore>()(
   persist(
     (set) => ({
@@ -35,23 +30,43 @@ const useAuthStore = create<AuthStore>()(
       error: null,
 
       login: async (email, password) => {
-        set({ isLoading: true, error: null });
-        await new Promise((res) => setTimeout(res, 500)); // simulasi API
-        const found = dummyUsers.find((u) => u.email === email);
-        if (found && password === "123456") {
+        try {
+          set({ isLoading: true, error: null });
+
+          const response = await fetch(
+            "https://demo-api-three-pied.vercel.app/api/auth/login",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                email,
+                password,
+              }),
+            },
+          );
+
+          const result = await response.json();
+
+          if (!response.ok) {
+            throw new Error(result.message || "Email atau password salah");
+          }
+
           set({
-            user: found,
-            token: "dummy-token",
+            user: result.user,
+            token: result.token,
             isAuthenticated: true,
             isLoading: false,
             error: null,
           });
-        } else {
+        } catch (error) {
           set({
             isLoading: false,
-            error: "Email atau password salah",
+            error: error instanceof Error ? error.message : "Terjadi kesalahan",
           });
-          throw new Error("Email atau password salah");
+
+          throw error;
         }
       },
 
@@ -63,7 +78,9 @@ const useAuthStore = create<AuthStore>()(
           error: null,
         }),
     }),
-    { name: "auth-storage" },
+    {
+      name: "auth-storage",
+    },
   ),
 );
 

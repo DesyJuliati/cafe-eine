@@ -3,14 +3,14 @@ import { useNavigate } from "react-router-dom";
 import {
   BarChart2,
   ShoppingBag,
-  Users,
   TrendingUp,
   LogOut,
   Coffee,
   ArrowRight,
+  Users,
   Receipt,
 } from "lucide-react";
-import { useAuthStore } from "@/store/authStore";
+import useAuthStore from "@/store/authStore";
 import toast from "react-hot-toast";
 
 export default function DashboardPage() {

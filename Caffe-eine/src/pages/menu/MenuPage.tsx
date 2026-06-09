@@ -8,7 +8,6 @@ import {
   RefreshCw,
   Camera,
 } from "lucide-react";
-import { Emoji } from "react-emoji-render";
 import AppLayout from "@/component/common/AppLayout";
 import {
   useMenuStore,
@@ -344,7 +343,7 @@ export default function MenuManagement() {
                           }}
                         />
                       ) : (
-                        <Emoji text={item.image} />
+                        <span>{item.image}</span>
                       )}
                     </span>
                     <div>
@@ -640,14 +639,13 @@ export default function MenuManagement() {
                         }}
                       />
                     ) : (
-                      <Emoji text={form.image} />
+                      <span>{form.image}</span>
                     )}
                   </span>
                   <span style={{ fontSize: 12, color: "#9CA3AF" }}>
                     Preview
                   </span>
                 </div>
-                {/* Emoji Grid — sekarang semua via <Emoji> */}
                 <div
                   style={{
                     display: "grid",
@@ -681,7 +679,7 @@ export default function MenuManagement() {
                         lineHeight: 1,
                       }}
                     >
-                      <Emoji text={emoji} />{" "}
+                      <span>{emoji}</span>{" "}
                       {/* ✅ emoji dirender lewat library */}
                     </button>
                   ))}
