@@ -28,7 +28,6 @@
   --font-body: Roboto, sans-serif;
   --font-mono: Roboto Mono, monospace; /* 4harga &angka */
 }
-
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -149,6 +148,20 @@
     @apply bg-background text-foreground;
   }
 }
-
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #receipt-print,
+  #receipt-print * {
+    visibility: visible;
+  }
+  #receipt-print {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}
 /* sam same smpe bawah lah
  */

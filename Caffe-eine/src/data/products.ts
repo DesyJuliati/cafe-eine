@@ -5,6 +5,7 @@ export type Product = {
   category: string;
   image: string;
   isAvailable: boolean;
+  code: string;
 };
 
 export const categories = ["Semua", "Kopi", "Non-Kopi", "Cemilan", "Makanan"];
@@ -18,6 +19,7 @@ export const products: Product[] = [
     category: "Kopi",
     image: "/src/assets/Espresso.png",
     isAvailable: true,
+    code: "ESP",
   },
   {
     id: 2,
@@ -26,6 +28,7 @@ export const products: Product[] = [
     category: "Kopi",
     image: "/src/assets/Americano.png",
     isAvailable: true,
+    code: "AMR",
   },
   {
     id: 3,
@@ -34,6 +37,7 @@ export const products: Product[] = [
     category: "Kopi",
     image: "/src/assets/Affogato.png",
     isAvailable: true,
+    code: "AFT",
   },
   {
     id: 4,
@@ -42,6 +46,7 @@ export const products: Product[] = [
     category: "Kopi",
     image: "/src/assets/Caramel.png",
     isAvailable: true,
+    code: "CRL",
   },
   {
     id: 5,
@@ -50,6 +55,7 @@ export const products: Product[] = [
     category: "Non-Kopi",
     image: "/src/assets/Matcha.png",
     isAvailable: true,
+    code: "MCL",
   },
   {
     id: 6,
@@ -58,6 +64,7 @@ export const products: Product[] = [
     category: "Non-Kopi",
     image: "/src/assets/Coklat.png",
     isAvailable: true,
+    code: "CKT",
   },
   {
     id: 7,
@@ -66,6 +73,7 @@ export const products: Product[] = [
     category: "Non-Kopi",
     image: "/src/assets/Teh.png",
     isAvailable: true,
+    code: "THK",
   },
   {
     id: 8,
@@ -74,6 +82,7 @@ export const products: Product[] = [
     category: "Cemilan",
     image: "/src/assets/Croissant.png",
     isAvailable: false,
+    code: "CRS",
   },
   {
     id: 9,
@@ -82,6 +91,7 @@ export const products: Product[] = [
     category: "Makanan",
     image: "/src/assets/Sandwich.png",
     isAvailable: true,
+    code: "SDW",
   },
   {
     id: 10,
@@ -90,6 +100,7 @@ export const products: Product[] = [
     category: "Cemilan",
     image: "/src/assets/Tiramissu.png",
     isAvailable: true,
+    code: "TMS",
   },
   {
     id: 11,
@@ -98,6 +109,7 @@ export const products: Product[] = [
     category: "Cemilan",
     image: "/src/assets/Cheesecake.png",
     isAvailable: true,
+    code: "CHK",
   },
 ];
 

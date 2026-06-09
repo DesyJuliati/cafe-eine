@@ -1,164 +1,125 @@
-// ini main dari trolli
 import { create } from "zustand";
-import type { Product } from "@/data/products";
+import { persist } from "zustand/middleware";
 
-export type CartItem = {
+export interface CartItem {
   id: number;
   name: string;
   price: number;
   image: string;
+  category: "Coffee" | "Food" | "Non-Coffee";
   quantity: number;
-};
+  sugarLevel: number; // 0 jika Espresso/Americano/Food
+  temperature: "Panas" | "Dingin" | "N/A";
+  milk: "Full Cream" | "Low Fat" | "Oat Milk" | "N/A"; // N/A jika tidak pakai susu
+  request: string;
+}
 
-type CartStore = {
+interface CartStore {
   items: CartItem[];
-  addItem: (product: Product) => void;
-  // Tambah produk ke keranjang
-  // Kalau sudah ada → naikkan quantity
-  // Kalau belum ada → tambahkan sebagai item baru
+  customerName: string;
+  tableNumber: string;
+  customerType: "Dine In" | "Take Away";
 
-  removeItem: (id: number) => void;
-  // Hapus item dari keranjang berdasarkan id
-
-  increaseQuantity: (id: number) => void;
-  // Tambah quantity item +1
-
-  decreaseQuantity: (id: number) => void;
-  // Kurangi quantity item -1
-  // Kalau quantity sudah 1 dan dikurangi → hapus dari keranjang
-
+  setCustomerInfo: (
+    name: string,
+    type: "Dine In" | "Take Away",
+    table?: string,
+  ) => void;
+  addItem: (item: Omit<CartItem, "quantity">) => void;
+  removeItem: (itemId: number) => void; // by id
+  removeItemByIndex: (index: number) => void; // by index
+  updateQuantity: (index: number, quantity: number) => void;
+  increaseQuantity: (itemId: number) => void; // FIX: tambah method ini
+  decreaseQuantity: (itemId: number) => void; // FIX: tambah method ini
   clearCart: () => void;
-  // Kosongkan seluruh keranjang
-  // Dipanggil setelah pembayaran berhasil
-
-  // COMPUTED VALUES (nilai yang dihitung otomatis):
   getTotalPrice: () => number;
-  // Hitung total harga semua item
-  // Contoh: Espresso(Rp20k × 2) + Americano(Rp22k × 1) = Rp62k
-
   getTotalItems: () => number;
-  // Hitung total jumlah item
-  // Contoh: Espresso(2) + Americano(1) = 3 item
-};
-export const useCartStore = create<CartStore>((set, get) => ({
-  // "set" = fungsi untuk MENGUBAH data di store
-  // "get" = fungsi untuk MEMBACA data di store saat ini
+}
 
-  // ---- DATA AWAL ----
-  items: [],
-  // Keranjang mulai kosong
+export const useCartStore = create<CartStore>()(
+  persist(
+    (set, get) => ({
+      items: [],
+      customerName: "",
+      tableNumber: "",
+      customerType: "Dine In",
 
-  // ============================================
-  // AKSI 1: addItem — Tambah produk ke keranjang
-  // ============================================
-  addItem: (product: Product) => {
-    set((state) => {
-      // "state" = kondisi store SAAT INI sebelum diubah
+      setCustomerInfo: (name, type, table = "") =>
+        set({ customerName: name, customerType: type, tableNumber: table }),
 
-      // Cek apakah produk ini sudah ada di keranjang
-      const existingItem = state.items.find(
-        (item) => item.id === product.id,
-        // .find() = cari item yang id-nya sama dengan product.id
-      );
-
-      if (existingItem) {
-        // SUDAH ADA → naikkan quantity-nya saja
-        return {
-          items: state.items.map(
+      addItem: (newItem) =>
+        set((state) => {
+          const existingIndex = state.items.findIndex(
             (item) =>
-              item.id === product.id
-                ? { ...item, quantity: item.quantity + 1 }
-                : // { ...item } = salin semua data item yang lama
-                  // quantity: item.quantity + 1 = ganti quantity dengan +1
-                  item,
-            // Kalau bukan item ini, biarkan apa adanya
+              item.id === newItem.id &&
+              item.sugarLevel === newItem.sugarLevel &&
+              item.temperature === newItem.temperature &&
+              item.milk === newItem.milk &&
+              item.request === newItem.request,
+          );
+          if (existingIndex >= 0) {
+            const updated = [...state.items];
+            updated[existingIndex].quantity += 1;
+            return { items: updated };
+          }
+          return { items: [...state.items, { ...newItem, quantity: 1 }] };
+        }),
+
+      removeItem: (itemId) =>
+        set((state) => ({
+          items: state.items.filter((item) => item.id !== itemId),
+        })),
+
+      removeItemByIndex: (index) =>
+        set((state) => ({ items: state.items.filter((_, i) => i !== index) })),
+
+      updateQuantity: (index, quantity) =>
+        set((state) => {
+          const updated = [...state.items];
+          if (quantity <= 0) updated.splice(index, 1);
+          else updated[index].quantity = quantity;
+          return { items: updated };
+        }),
+
+      // FIX: increaseQuantity by id
+      increaseQuantity: (itemId) =>
+        set((state) => ({
+          items: state.items.map((item) =>
+            item.id === itemId
+              ? { ...item, quantity: item.quantity + 1 }
+              : item,
           ),
-        };
-      } else {
-        // BELUM ADA → tambahkan sebagai item baru
-        return {
-          items: [
-            ...state.items,
-            // ...state.items = salin semua item yang sudah ada
-            {
-              id: product.id,
-              name: product.name,
-              price: product.price,
-              image: product.image,
-              quantity: 1,
-              // quantity mulai dari 1
-            },
-          ],
-        };
-      }
-    });
-  },
+        })),
 
-  // ============================================
-  // AKSI 2: removeItem — Hapus item dari keranjang
-  // ============================================
-  removeItem: (id: number) => {
-    set((state) => ({
-      items: state.items.filter((item) => item.id !== id),
-      // .filter() = buat array baru yang TIDAK mengandung item dengan id ini
-      // Artinya: "simpan semua item KECUALI yang id-nya sama"
-    }));
-  },
+      // FIX: decreaseQuantity by id - remove jika qty = 1
+      decreaseQuantity: (itemId) =>
+        set((state) => {
+          const item = state.items.find((i) => i.id === itemId);
+          if (!item) return state;
+          if (item.quantity <= 1) {
+            return { items: state.items.filter((i) => i.id !== itemId) };
+          }
+          return {
+            items: state.items.map((i) =>
+              i.id === itemId ? { ...i, quantity: i.quantity - 1 } : i,
+            ),
+          };
+        }),
 
-  // ============================================
-  // AKSI 3: increaseQuantity — Tambah +1
-  // ============================================
-  increaseQuantity: (id: number) => {
-    set((state) => ({
-      items: state.items.map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item,
-      ),
-    }));
-  },
+      clearCart: () =>
+        set({
+          items: [],
+          customerName: "",
+          tableNumber: "",
+          customerType: "Dine In",
+        }),
 
-  // ============================================
-  // AKSI 4: decreaseQuantity — Kurangi -1
-  // ============================================
-  decreaseQuantity: (id: number) => {
-    set((state) => ({
-      items: state.items
-        .map((item) =>
-          item.id === id ? { ...item, quantity: item.quantity - 1 } : item,
-        )
-        .filter((item) => item.quantity > 0),
-      // Setelah dikurangi, hapus item yang quantity-nya jadi 0
-      // Jadi kalau quantity = 1 lalu dikurangi → 0 → otomatis hilang dari keranjang
-    }));
-  },
+      getTotalPrice: () =>
+        get().items.reduce((sum, item) => sum + item.price * item.quantity, 0),
 
-  // ============================================
-  // AKSI 5: clearCart — Kosongkan keranjang
-  // ============================================
-  clearCart: () => {
-    set({ items: [] });
-    // Langsung set items jadi array kosong
-  },
-
-  // ============================================
-  // COMPUTED 1: getTotalPrice — Hitung total harga
-  // ============================================
-  getTotalPrice: () => {
-    const { items } = get();
-    // get() = baca data store saat ini
-    return items.reduce((total, item) => {
-      return total + item.price * item.quantity;
-      // Untuk setiap item: tambahkan (harga × jumlah) ke total
-    }, 0);
-    // 0 = nilai awal total sebelum dihitung
-  },
-
-  // ============================================
-  // COMPUTED 2: getTotalItems — Hitung total item
-  // ============================================
-  getTotalItems: () => {
-    const { items } = get();
-    return items.reduce((total, item) => {
-      return total + item.quantity;
-    }, 0);
-  },
-}));
+      getTotalItems: () =>
+        get().items.reduce((sum, item) => sum + item.quantity, 0),
+    }),
+    { name: "cart-storage" },
+  ),
+);
