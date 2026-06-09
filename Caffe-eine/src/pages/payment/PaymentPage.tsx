@@ -9,7 +9,7 @@ import {
   Trash2,
 } from "lucide-react";
 import AppLayout from "@/component/common/AppLayout";
-import { useCartStore } from "@/store/cartStore";
+import { useCartStore, type CartItem } from "@/store/cartStore";
 import { useKitchenStore } from "@/store/kitchenStore";
 import toast from "react-hot-toast";
 
@@ -38,7 +38,32 @@ export default function PaymentPage() {
   const [paid, setPaid] = useState(false);
   const [invoice, setInvoice] = useState("");
   const [paidAt, setPaidAt] = useState("");
-  const [isEditing, setIsEditing] = useState(false); // req #2: mode edit
+  const [isEditing, setIsEditing] = useState(false);
+
+  // ✅ Snapshot untuk struk (termasuk total)
+  const [receiptData, setReceiptData] = useState<{
+    customerName: string;
+    customerType: "Dine In" | "Take Away";
+    tableNumber: string;
+    items: CartItem[];
+    subtotal: number;
+    tax: number;
+    total: number;
+    paymentMethod: string;
+    cashAmount: number;
+    change: number;
+  }>({
+    customerName: "",
+    customerType: "Dine In",
+    tableNumber: "",
+    items: [],
+    subtotal: 0,
+    tax: 0,
+    total: 0,
+    paymentMethod: "",
+    cashAmount: 0,
+    change: 0,
+  });
 
   const total = getTotalPrice();
   const tax = Math.round(total * 0.1);
@@ -61,6 +86,20 @@ export default function PaymentPage() {
     const now = new Date().toLocaleString("id-ID");
     setInvoice(inv);
     setPaidAt(now);
+
+    // ✅ Simpan snapshot sebelum clearCart (termasuk total)
+    setReceiptData({
+      customerName: customerName || "Guest",
+      customerType,
+      tableNumber,
+      items: [...cart],
+      subtotal: total,
+      tax: tax,
+      total: grandTotal,
+      paymentMethod: method,
+      cashAmount: Number(cash) || 0,
+      change: method === "Tunai" ? change : 0,
+    });
 
     addOrder({
       invoiceNumber: inv,
@@ -99,6 +138,19 @@ export default function PaymentPage() {
 
   // ── SUCCESS PAGE ───────────────────────────────────────────────
   if (paid) {
+    const {
+      customerName: rName,
+      customerType: rType,
+      tableNumber: rTable,
+      items: rItems,
+      subtotal: rSubtotal,
+      tax: rTax,
+      total: rTotal,
+      paymentMethod: rMethod,
+      cashAmount: rCash,
+      change: rChange,
+    } = receiptData;
+
     return (
       <AppLayout title="Pembayaran Berhasil">
         <div style={{ maxWidth: 520, margin: "0 auto" }}>
@@ -125,6 +177,7 @@ export default function PaymentPage() {
             </p>
           </div>
 
+          {/* STRUK */}
           <div
             ref={receiptRef}
             style={{
@@ -154,34 +207,60 @@ export default function PaymentPage() {
             <div style={{ fontSize: 13, marginBottom: 12 }}>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span style={{ color: "#6B7280" }}>Pelanggan</span>
-                <span style={{ fontWeight: 600 }}>
-                  {customerName || "Guest"}
-                </span>
+                <span style={{ fontWeight: 600 }}>{rName}</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span style={{ color: "#6B7280" }}>Tipe</span>
                 <span style={{ fontWeight: 600 }}>
-                  {customerType}
-                  {tableNumber ? ` · Meja ${tableNumber}` : ""}
+                  {rType}
+                  {rTable ? ` · Meja ${rTable}` : ""}
                 </span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span style={{ color: "#6B7280" }}>Bayar via</span>
-                <span style={{ fontWeight: 600 }}>{method}</span>
+                <span style={{ fontWeight: 600 }}>{rMethod}</span>
               </div>
             </div>
             <hr style={{ borderTop: "1px dashed #E8DDD0", margin: "12px 0" }} />
+
+            {/* ITEM PESANAN */}
             <div style={{ fontSize: 13, marginBottom: 12 }}>
               <div style={{ fontWeight: 700, marginBottom: 8 }}>
                 Item Pesanan:
               </div>
-              <p
-                style={{ color: "#9CA3AF", fontSize: 12, textAlign: "center" }}
-              >
-                — (tersimpan di dapur) —
-              </p>
+              {rItems.length === 0 ? (
+                <p
+                  style={{
+                    color: "#9CA3AF",
+                    fontSize: 12,
+                    textAlign: "center",
+                  }}
+                >
+                  — (tidak ada item) —
+                </p>
+              ) : (
+                rItems.map((item, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      marginBottom: 4,
+                    }}
+                  >
+                    <span>
+                      {item.name} x{item.quantity}
+                    </span>
+                    <span style={{ fontWeight: 600 }}>
+                      Rp {(item.price * item.quantity).toLocaleString("id-ID")}
+                    </span>
+                  </div>
+                ))
+              )}
             </div>
             <hr style={{ borderTop: "1px dashed #E8DDD0", margin: "12px 0" }} />
+
+            {/* ✅ TOTAL (sekarang dari snapshot) */}
             <div style={{ fontSize: 13 }}>
               <div
                 style={{
@@ -191,7 +270,7 @@ export default function PaymentPage() {
                 }}
               >
                 <span style={{ color: "#6B7280" }}>Subtotal</span>
-                <span>Rp {total.toLocaleString("id-ID")}</span>
+                <span>Rp {rSubtotal.toLocaleString("id-ID")}</span>
               </div>
               <div
                 style={{
@@ -201,7 +280,7 @@ export default function PaymentPage() {
                 }}
               >
                 <span style={{ color: "#6B7280" }}>Tax (10%)</span>
-                <span>Rp {tax.toLocaleString("id-ID")}</span>
+                <span>Rp {rTax.toLocaleString("id-ID")}</span>
               </div>
               <div
                 style={{
@@ -214,9 +293,9 @@ export default function PaymentPage() {
                 }}
               >
                 <span>TOTAL</span>
-                <span>Rp {grandTotal.toLocaleString("id-ID")}</span>
+                <span>Rp {rTotal.toLocaleString("id-ID")}</span>
               </div>
-              {method === "Tunai" && Number(cash) > 0 && (
+              {rMethod === "Tunai" && rCash > 0 && (
                 <div
                   style={{
                     display: "flex",
@@ -227,7 +306,7 @@ export default function PaymentPage() {
                   }}
                 >
                   <span>Kembalian</span>
-                  <span>Rp {change.toLocaleString("id-ID")}</span>
+                  <span>Rp {rChange.toLocaleString("id-ID")}</span>
                 </div>
               )}
             </div>
@@ -280,7 +359,6 @@ export default function PaymentPage() {
   return (
     <AppLayout title="Pembayaran">
       <div style={{ maxWidth: 580, margin: "0 auto" }}>
-        {/* Tombol Kembali / Edit — REQ #2 */}
         <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
           <button
             onClick={() => navigate("/pos")}
@@ -320,7 +398,6 @@ export default function PaymentPage() {
           </button>
         </div>
 
-        {/* Ringkasan Pesanan */}
         <div style={cardSt}>
           <h3 style={secTitle}>🧾 Ringkasan Pesanan</h3>
           <div style={{ fontSize: 13, color: "#6B7280", marginBottom: 12 }}>
@@ -342,7 +419,10 @@ export default function PaymentPage() {
             cart.map((item, idx) => (
               <div
                 key={idx}
-                style={{ padding: "10px 0", borderBottom: "1px solid #F3F4F6" }}
+                style={{
+                  padding: "10px 0",
+                  borderBottom: "1px solid #F3F4F6",
+                }}
               >
                 <div
                   style={{
@@ -383,7 +463,6 @@ export default function PaymentPage() {
                     <span style={{ fontWeight: 600 }}>
                       Rp {(item.price * item.quantity).toLocaleString("id-ID")}
                     </span>
-                    {/* Edit mode: tampil tombol hapus & qty */}
                     {isEditing && (
                       <div
                         style={{
@@ -471,7 +550,6 @@ export default function PaymentPage() {
           </div>
         </div>
 
-        {/* Metode Pembayaran */}
         <div style={cardSt}>
           <h3 style={secTitle}>💳 Metode Pembayaran</h3>
           <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>

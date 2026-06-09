@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useCartStore } from "@/store/cartStore";
-import logo from "@/assets/logo.png";
+import logo from "./assets/logo.png";
 
 const TopBar = () => {
   const [time, setTime] = useState(new Date());

@@ -5,9 +5,9 @@ import {
   ClipboardList,
   BarChart3,
   UtensilsCrossed,
-  Package,
   LogOut,
   Coffee,
+  Users,
 } from "lucide-react";
 import useAuthStore from "@/store/authStore";
 
@@ -21,7 +21,7 @@ const navItems = [
   {
     to: "/pos",
     icon: ShoppingCart,
-    label: "Kasir ",
+    label: "Kasir",
     roles: ["admin", "cashier"],
   },
   {
@@ -37,8 +37,12 @@ const navItems = [
     label: "Menu",
     roles: ["admin"],
   },
-
-  { to: "/stock", icon: Package, label: "Stok", roles: ["admin"] },
+  {
+    to: "/employees",
+    icon: Users,
+    label: "Karyawan",
+    roles: ["admin"],
+  },
 ];
 
 export default function Sidebar() {

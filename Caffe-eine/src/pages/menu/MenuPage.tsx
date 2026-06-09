@@ -7,6 +7,8 @@ import {
   ToggleRight,
   RefreshCw,
   Camera,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import AppLayout from "@/component/common/AppLayout";
 import {
@@ -397,14 +399,28 @@ export default function MenuManagement() {
                 >
                   Rp {item.price.toLocaleString("id-ID")}
                 </td>
-                <td style={{ padding: "14px 16px" }}>
-                  {item.hasSugar ? "✅" : "❌"}
+                <td style={{ padding: "14px 16px", textAlign: "center" }}>
+                  {item.hasSugar ? (
+                    <CheckCircle2 size={20} color="#22C55E" />
+                  ) : (
+                    <XCircle size={20} color="#EF4444" />
+                  )}
                 </td>
-                <td style={{ padding: "14px 16px" }}>
-                  {item.hasMilk ? "✅" : "❌"}
+
+                <td style={{ padding: "14px 16px", textAlign: "center" }}>
+                  {item.hasMilk ? (
+                    <CheckCircle2 size={20} color="#22C55E" />
+                  ) : (
+                    <XCircle size={20} color="#EF4444" />
+                  )}
                 </td>
-                <td style={{ padding: "14px 16px" }}>
-                  {item.hasTemp ? "✅" : "❌"}
+
+                <td style={{ padding: "14px 16px", textAlign: "center" }}>
+                  {item.hasTemp ? (
+                    <CheckCircle2 size={20} color="#22C55E" />
+                  ) : (
+                    <XCircle size={20} color="#EF4444" />
+                  )}
                 </td>
                 <td style={{ padding: "14px 16px" }}>
                   <button
